@@ -3,8 +3,6 @@
 import json
 import os
 
-from anthropic import Anthropic
-
 from ai.base import AIClient, AnalysisResult
 
 # Prompt template for structured paper analysis.
@@ -46,6 +44,13 @@ class ClaudeClient(AIClient):
                 "ANTHROPIC_API_KEY environment variable not set. "
                 "Set it or pass api_key to ClaudeClient()."
             )
+        try:
+            from anthropic import Anthropic
+        except ImportError as exc:
+            raise RuntimeError(
+                "Anthropic SDK import failed. If running a packaged EXE, "
+                "ensure OpenSSL DLLs (libssl/libcrypto) are bundled."
+            ) from exc
         self._client = Anthropic(api_key=api_key)
         self._model = model
 
