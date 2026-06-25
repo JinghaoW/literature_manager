@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paper Notes</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Left Panel: Filter Navigation -->
+<nav id="left-panel">
+  <h2>Papers</h2>
+  <button class="filter-btn active" data-status="">All Papers <span class="count">(0)</span></button>
+  <div class="filter-spacer"></div>
+  <button class="filter-btn" data-status="Unread">Unread <span class="count">(0)</span></button>
+  <button class="filter-btn" data-status="Reading">Reading <span class="count">(0)</span></button>
+  <button class="filter-btn" data-status="Read">Read <span class="count">(0)</span></button>
+  <div class="nav-footer">
+    <button id="import-btn" title="Import PDFs from a folder">+ Import Folder</button>
+  </div>
+</nav>
+
+<!-- Center Panel: Paper List -->
+<section id="center-panel">
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Search title, keywords, notes..." autocomplete="off">
+    <button id="search-clear" title="Clear search">&times;</button>
+  </div>
+  <div id="paper-list"></div>
+</section>
+
+<!-- Right Panel: Paper Details -->
+<section id="right-panel">
+  <div id="detail-empty">Select a paper to view details</div>
+  <div id="detail-content" class="hidden">
+    <h2 id="detail-title"></h2>
+    <div class="status-row">
+      <label>Status:</label>
+      <select id="status-select">
+        <option value="Unread">Unread</option>
+        <option value="Reading">Reading</option>
+        <option value="Read">Read</option>
+      </select>
+      <button id="open-pdf-btn" class="small-btn">Open PDF</button>
+    </div>
+    <hr>
+    <h3>Summary</h3>
+    <p id="detail-summary" class="muted">No summary yet.</p>
+    <button id="analyze-btn" class="small-btn">AI Analyze</button>
+    <span id="analyze-status"></span>
+    <h3>Keywords</h3>
+    <p id="detail-keywords" class="keywords"></p>
+    <h3>Notes</h3>
+    <textarea id="detail-notes" placeholder="Write your notes here (Markdown supported)..."></textarea>
+    <span id="notes-saved" class="hidden">Saved</span>
+    <button id="import-annots-btn" class="small-btn" style="margin-top:8px">Import PDF Annotations as Notes</button>
+    <h3>PDF Annotations</h3>
+    <div id="annotations-list"><span class="muted">—</span></div>
+    <h3>Related Papers</h3>
+    <div id="related-list"></div>
+  </div>
+</section>
+
+<!-- Hidden file input for folder selection (via webkitdirectory) -->
+<input type="file" id="folder-input" webkitdirectory multiple accept=".pdf" style="display:none">
+
+<script src="app.js"></script>
+</body>
+</html>
