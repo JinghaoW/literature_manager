@@ -26,6 +26,20 @@ FONT_SMALL = ("Segoe UI", 9)
 FONT_BOLD = ("Segoe UI", 10, "bold")
 FONT_TITLE = ("Segoe UI", 14, "bold")
 
+HELP_ITEMS = [
+    "1. Click File -> Import Folder... or the left-side Import Folder button to batch import PDFs.",
+    "2. Use All/Unread/Reading/Read in the left panel to filter papers by reading status.",
+    "3. Use the center search box for real-time matching by title, keywords, or notes.",
+    "4. Double-click a paper item to open its PDF directly.",
+    "5. Update reading status from the right-side status dropdown or quick status buttons.",
+    "6. Notes (Markdown) supports note-taking and saves automatically when focus changes.",
+    "7. Click Import PDF Annotations to import annotations and highlights into notes.",
+    "8. Click AI Analyze to generate summary and keywords (API configuration required first).",
+    "9. Use New Config / Open Config in the left panel to create or edit model config files.",
+    "10. Click Graph View to switch to the graph view and inspect paper relationships.",
+    "11. Press F1 or open Help -> Usage Guide to view this guide at any time.",
+]
+
 STATUS_COLORS: dict[PaperStatus, str] = {
     PaperStatus.UNREAD: "#f0f0f0",
     PaperStatus.READING: "#cce5ff",
@@ -61,8 +75,15 @@ class TkApp:
 
     def _build_ui(self) -> None:
         """Construct the three-panel tkinter layout."""
+        self._tabs = ttk.Notebook(self._root)
+        self._tabs.pack(fill=tk.BOTH, expand=True)
+
+        self._main_tab = ttk.Frame(self._tabs)
+        self._help_tab = ttk.Frame(self._tabs)
+        self._tabs.add(self._main_tab, text="Library")
+
         # Container using pack — reliable collapse/expand.
-        self._main_area = ttk.Frame(self._root)
+        self._main_area = ttk.Frame(self._main_tab)
         self._main_area.pack(fill=tk.BOTH, expand=True)
 
         # --- Left panel ---
@@ -81,6 +102,7 @@ class TkApp:
         self._right_frame.pack(side=tk.RIGHT, fill=tk.Y)
         self._right_frame.pack_propagate(False)
         self._build_right(self._right_frame)
+        self._build_help_tab(self._help_tab)
 
         # Menu
         menubar = tk.Menu(self._root)
@@ -89,9 +111,58 @@ class TkApp:
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self._root.destroy)
         menubar.add_cascade(label="File", menu=file_menu)
+
+        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu.add_command(label="Usage Guide", command=self._show_help_tab, accelerator="F1")
+        menubar.add_cascade(label="Help", menu=help_menu)
+
         self._root.config(menu=menubar)
         self._root.bind_all("<Control-i>", lambda e: self._import_folder())
         self._root.bind_all("<Delete>", lambda e: self._delete_paper())
+        self._root.bind_all("<F1>", lambda e: self._show_help_tab())
+
+    def _build_help_tab(self, parent: ttk.Frame) -> None:
+        """Create help tab with built-in usage instructions."""
+        wrapper = ttk.Frame(parent)
+        wrapper.pack(fill=tk.BOTH, expand=True, padx=14, pady=12)
+
+        ttk.Label(wrapper, text="Usage Guide", font=FONT_TITLE).pack(anchor="w", pady=(0, 8))
+
+        list_frame = ttk.Frame(wrapper)
+        list_frame.pack(fill=tk.BOTH, expand=True)
+        self._help_list = tk.Listbox(list_frame, font=FONT, activestyle="none")
+        scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self._help_list.yview)
+        self._help_list.configure(yscrollcommand=scrollbar.set)
+        self._help_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self._help_list.bind("<MouseWheel>", lambda e: self._help_list.yview_scroll(int(-e.delta / 60), "units"))
+
+        for item in HELP_ITEMS:
+            self._help_list.insert(tk.END, item)
+
+    def _show_help_tab(self) -> None:
+        """Open usage guide in a separate window."""
+        top = tk.Toplevel(self._root)
+        top.title("Usage Guide")
+        top.geometry("650x520")
+        top.transient(self._root)
+        top.grab_set()
+
+        ttk.Label(top, text="Usage Guide", font=FONT_TITLE).pack(anchor="w", padx=14, pady=(12, 8))
+
+        list_frame = ttk.Frame(top)
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=14, pady=(0, 12))
+        help_list = tk.Listbox(list_frame, font=FONT, activestyle="none")
+        scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=help_list.yview)
+        help_list.configure(yscrollcommand=scrollbar.set)
+        help_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        help_list.bind("<MouseWheel>", lambda e: help_list.yview_scroll(int(-e.delta / 60), "units"))
+
+        for item in HELP_ITEMS:
+            help_list.insert(tk.END, item)
+
+        ttk.Button(top, text="Close", command=top.destroy).pack(pady=(0, 12))
 
     # ------------------------------------------------------------------
     # Left panel

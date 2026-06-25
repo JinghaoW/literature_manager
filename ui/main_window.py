@@ -2,6 +2,7 @@
 
 from PySide6.QtWidgets import (
     QMainWindow, QSplitter, QFileDialog, QMessageBox,
+    QTabWidget, QWidget, QVBoxLayout, QLabel, QListWidget,
 )
 from PySide6.QtCore import Qt
 
@@ -15,6 +16,16 @@ from utils.logger import get_logger
 from utils.similarity import find_related_papers
 
 _log = get_logger("ui.main_window")
+
+HELP_ITEMS = [
+    "1. Click File -> Import Folder... to batch import PDFs.",
+    "2. Use All/Unread/Reading/Read in the left panel to filter papers by reading status.",
+    "3. Use the center search box for real-time matching by title, keywords, or notes.",
+    "4. Update reading status from the right-side status dropdown.",
+    "5. Notes (Markdown) supports note-taking and auto-save.",
+    "6. Use Related Papers on the right to view and navigate to similar papers.",
+    "7. Press F1 or open Help -> Usage Guide to view this guide at any time.",
+]
 
 
 class MainWindow(QMainWindow):
@@ -50,6 +61,17 @@ class MainWindow(QMainWindow):
         import_action.setShortcut("Ctrl+I")
         import_action.triggered.connect(self._on_import_folder)
 
+        help_menu = menubar.addMenu("Help")
+        usage_action = help_menu.addAction("Usage Guide")
+        usage_action.setShortcut("F1")
+        usage_action.triggered.connect(self._show_help_tab)
+
+        self._tabs = QTabWidget()
+        self._main_tab = QWidget()
+        self._help_tab = QWidget()
+        self._tabs.addTab(self._main_tab, "Library")
+        self._tabs.addTab(self._help_tab, "Help")
+
         self._left = LeftPanel()
         self._center = CenterPanel()
         self._right = RightPanel()
@@ -63,7 +85,12 @@ class MainWindow(QMainWindow):
         splitter.setStretchFactor(2, 1)  # right: stretches
         splitter.setSizes([180, 450, 450])
 
-        self.setCentralWidget(splitter)
+        main_layout = QVBoxLayout(self._main_tab)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(splitter)
+
+        self._build_help_tab()
+        self.setCentralWidget(self._tabs)
 
     # ------------------------------------------------------------------
     # Signal wiring
@@ -183,3 +210,22 @@ class MainWindow(QMainWindow):
             f"Skipped (duplicates): {result.total_skipped}\n"
             f"Failed: {result.total_failed}",
         )
+
+    def _build_help_tab(self) -> None:
+        """Create Help tab with built-in usage instructions."""
+        layout = QVBoxLayout(self._help_tab)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(8)
+
+        title = QLabel("Usage Guide")
+        title.setStyleSheet("font-size: 16px; font-weight: bold;")
+        layout.addWidget(title)
+
+        help_list = QListWidget()
+        for item in HELP_ITEMS:
+            help_list.addItem(item)
+        layout.addWidget(help_list)
+
+    def _show_help_tab(self) -> None:
+        """Switch notebook to Help tab."""
+        self._tabs.setCurrentWidget(self._help_tab)
