@@ -28,6 +28,12 @@ There is also an optional Flask API + web UI under `web/` and legacy PySide6 UI 
 - PyMuPDF (`fitz`) for PDF text/annotation extraction
 - Anthropic SDK + OpenAI SDK for AI providers
 
+## Exe file 
+
+The built up exe file is located at https://github.com/JinghaoW/literature_manager/releases/tag/V1.0. It is a directly excutable exe file, doesn't need to be
+installed. 
+  
+
 ## Requirements
 
 Install the core dependencies:
